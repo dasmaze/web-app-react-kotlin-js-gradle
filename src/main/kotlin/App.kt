@@ -19,7 +19,7 @@ val App = functionalComponent<RProps> {
         videoList {
             videos = unwatchedVideos
             selectedVideo = currentVideo
-            onClick = { video ->
+            onSelectVideo = { video ->
                 setCurrentVideo(video)
             }
         }
@@ -29,37 +29,36 @@ val App = functionalComponent<RProps> {
         videoList {
             videos = watchedVideos
             selectedVideo = currentVideo
-            onClick = { video ->
+            onSelectVideo = { video ->
                 setCurrentVideo(video)
             }
         }
     }
-    styledDiv {
-        css {
-            position = Position.absolute
-            top = 10.px
-            right = 10.px
-        }
-        watchVideo {
-            video = currentVideo
+    if (currentVideo != null) {
+        styledDiv {
+            css {
+                position = Position.absolute
+                top = 10.px
+                right = 10.px
+            }
+            watchVideo {
+                video = currentVideo
+            }
         }
     }
 }
 
-external interface WatchProps: RProps {
-    var video: Video?
+external interface WatchProps : RProps {
+    var video: Video
 }
 
 val WatchVideo = functionalComponent<WatchProps> { props ->
-    val video = props.video
-    if (video != null) {
-        h3 {
-            +"${video.speaker}: ${video.title}"
-        }
-        img {
-            attrs {
-                src = "https://via.placeholder.com/640x360.png?text=Video+Player+Placeholder"
-            }
+    h3 {
+        +"${props.video.speaker}: ${props.video.title}"
+    }
+    img {
+        attrs {
+            src = "https://via.placeholder.com/640x360.png?text=Video+Player+Placeholder"
         }
     }
 }
@@ -70,18 +69,18 @@ fun RBuilder.watchVideo(handler: WatchProps.() -> Unit): ReactElement {
     }
 }
 
-external interface VideoListProps: RProps {
+external interface VideoListProps : RProps {
     var videos: List<Video>
     var selectedVideo: Video?
-    var onClick: (Video) -> Unit
+    var onSelectVideo: (Video) -> Unit
 }
 
 val VideoList = functionalComponent<VideoListProps> { props ->
     for (video in props.videos) {
         p {
             key = video.id.toString()
-            attrs.onClickFunction = { _ -> props.onClick(video) }
-            +"${if(video == props.selectedVideo) "▶ " else ""}${video.speaker}: ${video.title}"
+            attrs.onClickFunction = { _ -> props.onSelectVideo(video) }
+            +"${if (video == props.selectedVideo) "▶ " else ""}${video.speaker}: ${video.title}"
         }
     }
 }
