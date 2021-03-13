@@ -13,14 +13,14 @@ val App = functionalComponent<RProps>() {
         h3 {
             +"Videos to watch"
         }
-        child(VideoList) {
-            attrs.videos = unwatchedVideos
+        videoList {
+            videos = unwatchedVideos
         }
         h3 {
             +"Videos watched"
         }
-        child(VideoList) {
-            attrs.videos = watchedVideos
+        videoList {
+            videos = watchedVideos
         }
     }
     styledDiv {
@@ -50,5 +50,11 @@ val VideoList = functionalComponent<VideoListProps> { props ->
             key = video.id.toString()
             +"${video.speaker}: ${video.title}"
         }
+    }
+}
+
+fun RBuilder.videoList(handler: VideoListProps.() -> Unit): ReactElement {
+    return child(VideoList) {
+        attrs(handler)
     }
 }
