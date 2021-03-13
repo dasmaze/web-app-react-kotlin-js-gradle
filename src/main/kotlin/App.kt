@@ -6,7 +6,7 @@ import styled.css
 import styled.styledDiv
 
 @JsExport
-val App = functionalComponent<RProps>() {
+val App = functionalComponent<RProps> {
     val (currentVideo, setCurrentVideo) = useState<Video?>(null)
 
     h1 {
@@ -18,9 +18,8 @@ val App = functionalComponent<RProps>() {
         }
         videoList {
             videos = unwatchedVideos
+            selectedVideo = currentVideo
             onClick = { video ->
-                unwatchedVideos.remove(video)
-                watchedVideos.add(video)
                 setCurrentVideo(video)
             }
         }
@@ -29,6 +28,7 @@ val App = functionalComponent<RProps>() {
         }
         videoList {
             videos = watchedVideos
+            selectedVideo = currentVideo
             onClick = { video ->
                 setCurrentVideo(video)
             }
@@ -72,6 +72,7 @@ fun RBuilder.watchVideo(handler: WatchProps.() -> Unit): ReactElement {
 
 external interface VideoListProps: RProps {
     var videos: List<Video>
+    var selectedVideo: Video?
     var onClick: (Video) -> Unit
 }
 
@@ -80,7 +81,7 @@ val VideoList = functionalComponent<VideoListProps> { props ->
         p {
             key = video.id.toString()
             attrs.onClickFunction = { _ -> props.onClick(video) }
-            +"${video.speaker}: ${video.title}"
+            +"${if(video == props.selectedVideo) "▶ " else ""}${video.speaker}: ${video.title}"
         }
     }
 }
