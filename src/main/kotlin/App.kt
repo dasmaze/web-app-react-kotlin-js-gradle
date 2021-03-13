@@ -1,4 +1,5 @@
 import kotlinx.css.*
+import kotlinx.html.js.onClickFunction
 import react.*
 import react.dom.*
 import styled.css
@@ -6,6 +7,8 @@ import styled.styledDiv
 
 @JsExport
 val App = functionalComponent<RProps>() {
+    val (currentVideo, setCurrentVideo) = useState<Video?>(null)
+
     h1 {
         +"KotlinConf Explorer"
     }
@@ -15,12 +18,20 @@ val App = functionalComponent<RProps>() {
         }
         videoList {
             videos = unwatchedVideos
+            onClick = { video ->
+                unwatchedVideos.remove(video)
+                watchedVideos.add(video)
+                setCurrentVideo(video)
+            }
         }
         h3 {
             +"Videos watched"
         }
         videoList {
             videos = watchedVideos
+            onClick = { video ->
+                setCurrentVideo(video)
+            }
         }
     }
     styledDiv {
@@ -29,8 +40,21 @@ val App = functionalComponent<RProps>() {
             top = 10.px
             right = 10.px
         }
+        watchVideo {
+            video = currentVideo
+        }
+    }
+}
+
+external interface WatchProps: RProps {
+    var video: Video?
+}
+
+val WatchVideo = functionalComponent<WatchProps> { props ->
+    val video = props.video
+    if (video != null) {
         h3 {
-            +"John Doe: Building and breaking things"
+            +"${video.speaker}: ${video.title}"
         }
         img {
             attrs {
@@ -40,14 +64,22 @@ val App = functionalComponent<RProps>() {
     }
 }
 
+fun RBuilder.watchVideo(handler: WatchProps.() -> Unit): ReactElement {
+    return child(WatchVideo) {
+        attrs(handler)
+    }
+}
+
 external interface VideoListProps: RProps {
     var videos: List<Video>
+    var onClick: (Video) -> Unit
 }
 
 val VideoList = functionalComponent<VideoListProps> { props ->
     for (video in props.videos) {
         p {
             key = video.id.toString()
+            attrs.onClickFunction = { _ -> props.onClick(video) }
             +"${video.speaker}: ${video.title}"
         }
     }
