@@ -1,3 +1,5 @@
+import kotlinx.browser.window
+import kotlinx.coroutines.*
 import kotlinx.css.*
 import kotlinx.html.js.onClickFunction
 import react.*
@@ -9,18 +11,16 @@ import styled.styledDiv
 @JsExport
 val App = functionalComponent<RProps> {
     val (currentVideo, setCurrentVideo) = useState<Video?>(null)
-    val (unwatchedVideos, setUnwatchedVideos) = useState<List<Video>>(
-        listOf(
-            KotlinVideo(1, "Building and breaking things", "John Doe", "https://youtu.be/PsaFVLr8t4E"),
-            KotlinVideo(2, "The development process", "Jane Smith", "https://youtu.be/PsaFVLr8t4E"),
-            KotlinVideo(3, "The Web 7.0", "Matt Miller", "https://youtu.be/PsaFVLr8t4E")
-        )
-    )
-    val (watchedVideos, setWatchedVideos) = useState<List<Video>>(
-        listOf(
-            KotlinVideo(4, "Mouseless development", "Tom Jerry", "https://youtu.be/PsaFVLr8t4E")
-        )
-    )
+    val (unwatchedVideos, setUnwatchedVideos) = useState<List<Video>>(listOf())
+    val (watchedVideos, setWatchedVideos) = useState<List<Video>>(listOf())
+
+    useEffect(listOf()) {
+        val mainScope = MainScope()
+        mainScope.launch {
+            val videos = fetchVideos()
+            setUnwatchedVideos(videos)
+        }
+    }
 
     h1 {
         +"KotlinConf Explorer"
@@ -68,4 +68,21 @@ val App = functionalComponent<RProps> {
             }
         }
     }
+}
+
+suspend fun fetchVideo(id: Int): Video {
+    val response = window
+        .fetch("https://my-json-server.typicode.com/kotlin-hands-on/kotlinconf-json/videos/$id")
+        .await()
+        .json()
+        .await()
+    return response as Video
+}
+
+suspend fun fetchVideos(): List<Video> = coroutineScope {
+    (1..25).map { id ->
+        async {
+            fetchVideo(id)
+        }
+    }.awaitAll()
 }
