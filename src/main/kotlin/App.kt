@@ -56,11 +56,10 @@ val App = functionalComponent<RProps> {
             watchVideo {
                 video = currentVideo
                 onWatchButtonPressed = { video ->
-                    if(video in watchedVideos) {
+                    if (video in watchedVideos) {
                         setWatchedVideos(watchedVideos - video)
                         setUnwatchedVideos(unwatchedVideos + video)
-                    }
-                    else {
+                    } else {
                         setWatchedVideos(watchedVideos + video)
                         setUnwatchedVideos(unwatchedVideos - video)
                     }
@@ -68,88 +67,5 @@ val App = functionalComponent<RProps> {
                 watchedVideo = video in watchedVideos
             }
         }
-    }
-}
-
-external interface WatchProps : RProps {
-    var video: Video
-    var onWatchButtonPressed: (Video) -> Unit
-    var watchedVideo: Boolean
-}
-
-val WatchVideo = functionalComponent<WatchProps> { props ->
-    h3 {
-        +"${props.video.speaker}: ${props.video.title}"
-    }
-    reactPlayer {
-        attrs.url = props.video.videoUrl
-        attrs.adNetwork = false
-        attrs.noCookie = true
-        attrs.title = props.video.title
-    }
-    styledButton {
-        css {
-            display = Display.block
-            backgroundColor = if(props.watchedVideo) Color.red else Color.lightGreen
-        }
-        attrs {
-            onClickFunction = {
-                props.onWatchButtonPressed(props.video)
-            }
-        }
-        if(props.watchedVideo) {
-            +"Mark as unwatched"
-        }
-        else {
-            +"Mark as watched"
-        }
-    }
-    styledDiv {
-        css {
-            display = Display.flex
-            marginBottom = 10.px
-        }
-        emailShareButton {
-            attrs.url = props.video.videoUrl
-            emailIcon {
-                attrs.size = 32
-                attrs.round = true
-            }
-        }
-        telegramShareButton {
-            attrs.url = props.video.videoUrl
-            telegramIcon {
-                attrs.size = 32
-                attrs.round = true
-            }
-        }
-    }
-}
-
-fun RBuilder.watchVideo(handler: WatchProps.() -> Unit): ReactElement {
-    return child(WatchVideo) {
-        attrs(handler)
-    }
-}
-
-external interface VideoListProps : RProps {
-    var videos: List<Video>
-    var selectedVideo: Video?
-    var onSelectVideo: (Video) -> Unit
-}
-
-val VideoList = functionalComponent<VideoListProps> { props ->
-    for (video in props.videos) {
-        p {
-            key = video.id.toString()
-            attrs.onClickFunction = { _ -> props.onSelectVideo(video) }
-            +"${if (video == props.selectedVideo) "▶ " else ""}${video.speaker}: ${video.title}"
-        }
-    }
-}
-
-fun RBuilder.videoList(handler: VideoListProps.() -> Unit): ReactElement {
-    return child(VideoList) {
-        attrs(handler)
     }
 }
