@@ -3,14 +3,30 @@ import kotlinx.html.js.onClickFunction
 import react.*
 import react.dom.*
 import styled.css
+import styled.styledButton
 import styled.styledDiv
 
 @JsExport
 val App = functionalComponent<RProps> {
     val (currentVideo, setCurrentVideo) = useState<Video?>(null)
+    val (unwatchedVideos, setUnwatchedVideos) = useState<List<Video>>(
+        listOf(
+            KotlinVideo(1, "Building and breaking things", "John Doe", "https://youtu.be/PsaFVLr8t4E"),
+            KotlinVideo(2, "The development process", "Jane Smith", "https://youtu.be/PsaFVLr8t4E"),
+            KotlinVideo(3, "The Web 7.0", "Matt Miller", "https://youtu.be/PsaFVLr8t4E")
+        )
+    )
+    val (watchedVideos, setWatchedVideos) = useState<List<Video>>(
+        listOf(
+            KotlinVideo(4, "Mouseless development", "Tom Jerry", "https://youtu.be/PsaFVLr8t4E")
+        )
+    )
 
     h1 {
         +"KotlinConf Explorer"
+    }
+    val selectVideo: (Video) -> Unit = { video ->
+        setCurrentVideo(video)
     }
     div {
         h3 {
@@ -19,9 +35,7 @@ val App = functionalComponent<RProps> {
         videoList {
             videos = unwatchedVideos
             selectedVideo = currentVideo
-            onSelectVideo = { video ->
-                setCurrentVideo(video)
-            }
+            onSelectVideo = selectVideo
         }
         h3 {
             +"Videos watched"
@@ -29,9 +43,7 @@ val App = functionalComponent<RProps> {
         videoList {
             videos = watchedVideos
             selectedVideo = currentVideo
-            onSelectVideo = { video ->
-                setCurrentVideo(video)
-            }
+            onSelectVideo = selectVideo
         }
     }
     if (currentVideo != null) {
@@ -43,6 +55,17 @@ val App = functionalComponent<RProps> {
             }
             watchVideo {
                 video = currentVideo
+                onWatchButtonPressed = { video ->
+                    if(video in watchedVideos) {
+                        setWatchedVideos(watchedVideos - video)
+                        setUnwatchedVideos(unwatchedVideos + video)
+                    }
+                    else {
+                        setWatchedVideos(watchedVideos + video)
+                        setUnwatchedVideos(unwatchedVideos - video)
+                    }
+                }
+                watchedVideo = video in watchedVideos
             }
         }
     }
@@ -50,6 +73,8 @@ val App = functionalComponent<RProps> {
 
 external interface WatchProps : RProps {
     var video: Video
+    var onWatchButtonPressed: (Video) -> Unit
+    var watchedVideo: Boolean
 }
 
 val WatchVideo = functionalComponent<WatchProps> { props ->
@@ -59,6 +84,23 @@ val WatchVideo = functionalComponent<WatchProps> { props ->
     img {
         attrs {
             src = "https://via.placeholder.com/640x360.png?text=Video+Player+Placeholder"
+        }
+    }
+    styledButton {
+        css {
+            display = Display.block
+            backgroundColor = if(props.watchedVideo) Color.red else Color.lightGreen
+        }
+        attrs {
+            onClickFunction = {
+                props.onWatchButtonPressed(props.video)
+            }
+        }
+        if(props.watchedVideo) {
+            +"Mark as unwatched"
+        }
+        else {
+            +"Mark as watched"
         }
     }
 }
