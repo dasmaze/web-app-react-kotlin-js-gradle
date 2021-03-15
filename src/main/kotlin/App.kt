@@ -81,10 +81,11 @@ val WatchVideo = functionalComponent<WatchProps> { props ->
     h3 {
         +"${props.video.speaker}: ${props.video.title}"
     }
-    img {
-        attrs {
-            src = "https://via.placeholder.com/640x360.png?text=Video+Player+Placeholder"
-        }
+    reactPlayer {
+        attrs.url = props.video.videoUrl
+        attrs.adNetwork = false
+        attrs.noCookie = true
+        attrs.title = props.video.title
     }
     styledButton {
         css {
@@ -101,6 +102,26 @@ val WatchVideo = functionalComponent<WatchProps> { props ->
         }
         else {
             +"Mark as watched"
+        }
+    }
+    styledDiv {
+        css {
+            display = Display.flex
+            marginBottom = 10.px
+        }
+        emailShareButton {
+            attrs.url = props.video.videoUrl
+            emailIcon {
+                attrs.size = 32
+                attrs.round = true
+            }
+        }
+        telegramShareButton {
+            attrs.url = props.video.videoUrl
+            telegramIcon {
+                attrs.size = 32
+                attrs.round = true
+            }
         }
     }
 }
